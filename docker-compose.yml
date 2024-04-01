@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+  redis:
+    image: redis:alpine 
+    container_name: vcs-redis
+    restart: always
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    networks:
+      - vcs-kafka-learning
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: vcs-kafka
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    ports:
+      - "9092:9092"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  postgres:
+    image: postgres:alpine
+    container_name: vcs-postgres
+    environment:
+      POSTGRES_DB: shopping_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresql/:/var/lib/postgresql/data
+
+  golang-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.server
+    ports:
+      - "50051:50051"
+    depends_on:
+      - redis
+      - postgres
+      - kafka
+    networks:
+      - vcs-kafka-learning
+
+  golang-client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.client
+    depends_on:
+      - golang-server
+    environment:
+      SERVER_HOST: golang-server
+      SERVER_PORT: "50051"
+    networks:
+      - vcs-kafka-learning
+
+
+
+networks:
+  vcs-kafka-learning:
+    driver: bridge
