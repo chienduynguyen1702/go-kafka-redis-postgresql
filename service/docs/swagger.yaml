@@ -1,0 +1,63 @@
+definitions:
+  models.CreateOrderRequest:
+    properties:
+      name:
+        type: string
+      quantity:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /api/items:
+    get:
+      consumes:
+      - application/json
+      description: Get all items and its quantity
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: An array of items with their quantities.
+          schema:
+            type: araray
+      summary: Get all items and its quantity
+      tags:
+      - Items
+    post:
+      consumes:
+      - application/json
+      description: Reset quantity of items as start
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Items have been reset successfully.
+          schema:
+            type: string
+      summary: Reset quantity of items as start
+      tags:
+      - Items
+  /api/orders:
+    post:
+      consumes:
+      - application/json
+      description: Create an order
+      parameters:
+      - description: The request body.
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order have been created successfully.
+          schema:
+            type: string
+      summary: Create an order
+      tags:
+      - Orders
+swagger: "2.0"

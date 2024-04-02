@@ -21,3 +21,5 @@ The architecture is composed of 4 main components:
 docker-compose up --build -d
 ```
 
+
+

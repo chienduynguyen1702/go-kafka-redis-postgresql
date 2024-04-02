@@ -1,16 +1,17 @@
-package initialize
+package initializers
 
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
+
+	redis_connection "vcs-kafka-learning-go-service/modules/redis"
 
 	"github.com/redis/go-redis/v9"
 )
 
-func NewRedisClient(ctx context.Context) *redis.Client {
+func ConnectRedis() *redis.Client {
 	redisAddr := fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	redisPassword := os.Getenv("REDIS_PASSWORD")
 	redisDB, _ := strconv.Atoi(os.Getenv("REDIS_DB"))
@@ -22,14 +23,5 @@ func NewRedisClient(ctx context.Context) *redis.Client {
 		DB:       redisDB,
 		Protocol: redisProtocol,
 	}
-
-	rdb := redis.NewClient(redisOptions)
-
-	_, err := rdb.Ping(ctx).Result()
-	if err != nil {
-		log.Fatal("Error connecting to redis")
-	}
-
-	log.Println("Connected to redis")
-	return rdb
+	return redis_connection.NewRedisClient(redisOptions, context.Background())
 }

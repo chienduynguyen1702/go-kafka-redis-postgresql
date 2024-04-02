@@ -10,54 +10,89 @@ services:
       - "6379:6379"
     networks:
       - vcs-kafka-learning
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    container_name: vcs-zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - vcs-kafka-learning
+
+  # kafka:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: kafka
+  #   ports:
+  #     - "9092:9092"
+  #   environment:
+  #     KAFKA_ADVERTISED_HOST_NAME: localhost
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+  #     KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
   kafka:
-    image: bitnami/kafka:latest
+    image: wurstmeister/kafka:latest
     container_name: vcs-kafka
     environment:
       KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "orders:1:1,responses:1:1,test:1:1"
+    depends_on:
+      - zookeeper
     ports:
       - "9092:9092"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
-  postgres:
-    image: postgres:alpine
-    container_name: vcs-postgres
-    environment:
-      POSTGRES_DB: shopping_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgresql/:/var/lib/postgresql/data
-
-  golang-server:
+    networks:
+      - vcs-kafka-learning
+  gateway:
+    container_name: vcs-gateway
     build:
-      context: ./server
-      dockerfile: Dockerfile.server
+      context: ./gateway
+      dockerfile: gateway.Dockerfile
     ports:
-      - "50051:50051"
+      - "8080:8080"
+    restart: on-failure
+    environment:
+      REDIS_PORT: 6379
+      REDIS_HOST: vcs-redis
+      REDIS_PASSWORD: 123456
+      REDIS_DB: 0
+      REDIS_PROTOCOL: 3
+      RUN_ON: container
+      GIN_MODE: release
     depends_on:
       - redis
-      - postgres
       - kafka
     networks:
       - vcs-kafka-learning
-
-  golang-client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile.client
-    depends_on:
-      - golang-server
-    environment:
-      SERVER_HOST: golang-server
-      SERVER_PORT: "50051"
-    networks:
-      - vcs-kafka-learning
+      
+  # service:
+  #   container_name: vcs-service
+  #   build:
+  #     context: ./service
+  #     dockerfile: service.Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   restart: on-failure
+  #   environment:
+  #     REDIS_PORT: 6379
+  #     REDIS_HOST: vcs-redis
+  #     REDIS_PASSWORD: 123456
+  #     REDIS_DB: 0
+  #     REDIS_PROTOCOL: 3
+  #     RUN_ON: container
+  #     GIN_MODE: release
+  #   depends_on:
+  #     - redis
+  #     # - kafka
+  #   networks:
+  #     - vcs-kafka-learning
 
 
 
