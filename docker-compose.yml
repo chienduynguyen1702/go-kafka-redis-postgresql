@@ -66,6 +66,7 @@ services:
       REDIS_PROTOCOL: 3
       RUN_ON: container
       GIN_MODE: release
+      KAFKA_BROKER: kafka:9092
     depends_on:
       - redis
       - kafka

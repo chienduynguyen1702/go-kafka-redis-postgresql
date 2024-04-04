@@ -64,7 +64,7 @@ func ResetItemQuantity(c *gin.Context) {
 		}
 	}
 	if err == nil {
-		c.String(http.StatusOK, "Items have been reset successfully.")
+		c.JSON(http.StatusOK, gin.H{"message": "Items have been reset successfully."})
 	} else {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "An error occurred while trying to reset items"})
 	}
