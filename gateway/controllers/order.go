@@ -44,7 +44,7 @@ func CreateOrder(c *gin.Context) {
 	}
 
 	// Write the message to the Kafka topic
-	err = KafkaWriter.WriteMessages(c, message)
+	err = OrdersTopicProducer.WriteMessages(c, message)
 	if err != nil {
 		log.Printf("Error writing message to Kafka: %s", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
@@ -52,7 +52,7 @@ func CreateOrder(c *gin.Context) {
 	}
 
 	// Read the response from the Kafka topic
-	m, err := KafkaReader.ReadMessage(c)
+	m, err := ResponsesTopicConsumer.ReadMessage(c)
 	if err != nil {
 		log.Printf("Error reading message from Kafka: %s", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})

@@ -2,7 +2,7 @@ version: '3'
 
 services:
   redis:
-    image: redis:alpine 
+    image: redis:alpine
     container_name: vcs-redis
     restart: always
     command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
@@ -35,13 +35,14 @@ services:
     image: wurstmeister/kafka:latest
     container_name: vcs-kafka
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # HOSTNAME_COMMAND: kafka
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "orders:1:1,responses:1:1,test:1:1"
+      KAFKA_CREATE_TOPICS: "orders:1:2,responses:1:2,test:1:2"
     depends_on:
       - zookeeper
     ports:
@@ -72,7 +73,6 @@ services:
       - kafka
     networks:
       - vcs-kafka-learning
-      
   # service:
   #   container_name: vcs-service
   #   build:

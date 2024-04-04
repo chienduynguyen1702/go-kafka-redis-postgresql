@@ -2,24 +2,32 @@ package controllers
 
 import (
 	"context"
+	"log"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
 )
 
 var (
-	KafkaWriter   *kafka.Writer
-	KafkaReader   *kafka.Reader
-	RedisClient   *redis.Client
-	ctxBackground = context.Background()
+	OrdersTopicProducer    *kafka.Writer
+	ResponsesTopicConsumer *kafka.Reader
+	RedisClient            *redis.Client
+	ctxBackground          = context.Background()
 )
 
 func SetRedis(rc *redis.Client) {
 	RedisClient = rc
+	log.Println("Connected to redis !")
 }
 func SetKafkaWriter(kw *kafka.Writer) {
-	KafkaWriter = kw
+	OrdersTopicProducer = kw
+	log.Println("Connected to kafka as Producer !")
+	// print the kafka writer
+	// log.Printf("Kafka Writer: %v", OrdersTopicProducer)
 }
 func SetKafkaReader(kr *kafka.Reader) {
-	KafkaReader = kr
+	ResponsesTopicConsumer = kr
+	log.Println("Connected to kafka as Consumer !")
+	// print the kafka reader
+	// log.Printf("Kafka Reader: %v", ResponsesTopicConsumer)
 }

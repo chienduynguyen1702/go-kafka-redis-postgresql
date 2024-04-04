@@ -1,7 +1,7 @@
 package initializers
 
 import (
-	"log"
+	"fmt"
 	"os"
 	kafka_connection "vcs-kafka-learning-go-gateway/modules/kafka"
 
@@ -14,17 +14,15 @@ const (
 )
 
 var kafkaBroker = []string{os.Getenv("KAFKA_BROKER")}
+var kafkaAddress = os.Getenv("KAFKA_BROKER")
 
 func ConnectKafka() (*kafka.Reader, *kafka.Writer) {
+	// debug
+	fmt.Println("Kafka Broker: ", kafkaBroker)
+	fmt.Println("Kafka Address: ", kafkaAddress)
 	// Initialize Kafka writer
-	kafkaWriter, err := kafka_connection.NewKafkaWriter(orderTopicName, kafkaBroker)
-	if err != nil {
-		log.Fatalf("Failed to create Kafka writer: %v", err)
-	}
+	kafkaWriter := kafka_connection.NewKafkaWriter(orderTopicName, kafkaAddress)
 	// Initialize Kafka reader
-	kafkaReader, err := kafka_connection.NewKafkaReader(responseTopicName, kafkaBroker)
-	if err != nil {
-		log.Fatalf("Failed to create Kafka reader: %v", err)
-	}
+	kafkaReader := kafka_connection.NewKafkaReader(responseTopicName, kafkaBroker)
 	return kafkaReader, kafkaWriter
 }

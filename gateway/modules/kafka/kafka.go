@@ -5,25 +5,27 @@ import (
 )
 
 // const (
-// 	kafkaBroker        = "localhost:9092"
+// 	kafkaAddress        = "localhost:9092"
 // 	kafkaOrderTopic    = "orders"
 // 	kafkaResponseTopic = "responses"
 // )
 
 // Write message to Kafka topic
-func NewKafkaWriter(topic string, kafkaBroker []string) (*kafka.Writer, error) {
-	return kafka.NewWriter(kafka.WriterConfig{
-		Brokers: kafkaBroker,
-		Topic:   topic,
-	}), nil
+func NewKafkaWriter(topic string, kafkaAddress string) *kafka.Writer {
+	return &kafka.Writer{
+		Addr:     kafka.TCP(kafkaAddress),
+		Topic:    topic,
+		Balancer: &kafka.LeastBytes{},
+	}
 }
 
-func NewKafkaReader(topic string, kafkaBroker []string) (*kafka.Reader, error) {
+// Read message from Kafka topic
+func NewKafkaReader(topic string, kafkaBroker []string) *kafka.Reader {
 	return kafka.NewReader(kafka.ReaderConfig{
-		Brokers:   kafkaBroker,
-		Topic:     topic,
-		Partition: 0,
-		MinBytes:  10e3, // 10KB
-		MaxBytes:  10e6, // 10MB
-	}), nil
+		Brokers:  kafkaBroker,
+		Topic:    topic,
+		GroupID:  "vcs-kafka-learning-go-gateway",
+		MinBytes: 10e3, // 10KB
+		MaxBytes: 10e6, // 10MB
+	})
 }

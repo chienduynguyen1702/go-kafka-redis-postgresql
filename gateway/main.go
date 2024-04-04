@@ -21,15 +21,11 @@ func init() {
 	// Connect to Redis
 	redisClient := initializers.ConnectRedis()
 	controllers.SetRedis(redisClient)
-	log.Println("Connected to redis !")
 
 	// Connect to Kafka
-	kafkaConsumer, kafkaProducer := initializers.ConnectKafka()
-	defer kafkaProducer.Close()
-	controllers.SetKafkaWriter(kafkaProducer)
-	log.Println("Connected to kafka as Producer !")
-	controllers.SetKafkaReader(kafkaConsumer)
-	log.Println("Connected to kafka as Consumer !")
+	ResponsesTopicConsumer, OrdersTopicProducer := initializers.ConnectKafka()
+	controllers.SetKafkaWriter(OrdersTopicProducer)
+	controllers.SetKafkaReader(ResponsesTopicConsumer)
 
 	log.Println("Finish initiation !")
 
