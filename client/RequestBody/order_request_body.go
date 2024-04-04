@@ -20,9 +20,11 @@ type CreateOrderRequest struct {
 }
 
 func (orderRequest *CreateOrderRequest) Send() error {
-	var orderItem Item
-	orderItem.Name = orderRequest.Name
-	orderItem.Quantity = orderRequest.Quantity
+	var orderItem = Item{
+		ID:       orderRequest.ID,
+		Name:     orderRequest.Name,
+		Quantity: orderRequest.Quantity,
+	}
 	requestBody, err := json.Marshal(orderItem)
 	if err != nil {
 		return fmt.Errorf("error marshalling order request: %w", err)

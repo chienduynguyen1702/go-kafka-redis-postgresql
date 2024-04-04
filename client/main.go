@@ -7,15 +7,16 @@ import (
 	order_body "vcs-kafka-learning-go-client/RequestBody"
 )
 
+var items []order_body.Item
+
 func main() {
-	// menu to select the operation
 	menu()
 
 }
 func menu() {
-	var items []order_body.Item
 	var choice int
 	for {
+		order_request.FetchItems(&items)
 		fmt.Println("Select the operation")
 		fmt.Println("1. List all items")
 		fmt.Println("2. Make one random order")
@@ -34,7 +35,7 @@ func menu() {
 			fmt.Println("Exiting...")
 			os.Exit(0)
 		case 1:
-			order_request.ListAllItems(&items)
+			order_body.PrintList(&items)
 		case 2:
 			order_request.SendARandomOrder()
 		case 3:

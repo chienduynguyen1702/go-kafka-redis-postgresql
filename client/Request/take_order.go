@@ -17,8 +17,8 @@ const (
 )
 
 var (
-	itemsList    []order_body.Item
-	globalRandom = rand.New(rand.NewSource(time.Now().UnixNano()))
+	internalItemsList []order_body.Item
+	globalRandom      = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
 
 func SendARandomOrder() {
@@ -26,10 +26,10 @@ func SendARandomOrder() {
 	globalRandom.Seed(time.Now().UnixNano())
 
 	// Generate a random index within the range of the items slice length
-	randomIndex := globalRandom.Intn(len(itemsList))
+	randomIndex := globalRandom.Intn(len(internalItemsList))
 
 	// Select a random item
-	randomItem := itemsList[randomIndex]
+	randomItem := internalItemsList[randomIndex]
 
 	// Generate a random quantity between 1 and 15 (MAX_QUANTITY)
 	randomQuantity := globalRandom.Intn(MAX_QUANTITY) + 1
@@ -37,6 +37,7 @@ func SendARandomOrder() {
 	// Send order request
 	orderRequest := order_body.CreateOrderRequest{
 		Item: order_body.Item{
+			ID:       randomItem.ID,
 			Name:     randomItem.Name,
 			Quantity: randomQuantity,
 		},
@@ -62,7 +63,7 @@ func SendMultipleRandomOrders() {
 	}
 	fmt.Printf("%d orders sent successfully!", MAX_MULTIPLE_ORDER)
 }
-func ListAllItems(items *[]order_body.Item) {
+func FetchItems(items *[]order_body.Item) {
 
 	response, err := http.Get(api.Endpoint + "/items")
 	if err != nil {
@@ -86,9 +87,9 @@ func ListAllItems(items *[]order_body.Item) {
 	}
 
 	// Display items
-	order_body.PrintList(items)
+	// order_body.PrintList(items)
 	setItemList(items)
 }
 func setItemList(items *[]order_body.Item) {
-	itemsList = *items
+	internalItemsList = *items
 }
