@@ -4,11 +4,14 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-// const (
-// 	kafkaAddress        = "localhost:9092"
-// 	kafkaOrderTopic    = "orders"
-// 	kafkaResponseTopic = "responses"
-// )
+func NewConn(kafkaAddress string) *kafka.Conn {
+	conn, err := kafka.Dial("tcp", "localhost:9092")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer conn.Close()
+	return conn
+}
 
 // Write message to Kafka topic
 func NewKafkaWriter(topic string, kafkaAddress string) *kafka.Writer {

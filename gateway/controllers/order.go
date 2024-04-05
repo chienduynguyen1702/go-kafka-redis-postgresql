@@ -51,23 +51,8 @@ func CreateOrder(c *gin.Context) {
 		return
 	}
 
-	// Read the response from the Kafka topic
-	m, err := ResponsesTopicConsumer.ReadMessage(c)
-	if err != nil {
-		log.Printf("Error reading message from Kafka: %s", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		return
-	}
-
-	// Process the response message
-	var response models.Response
-	err = json.Unmarshal(m.Value, &response)
-	if err != nil {
-		log.Printf("Error unmarshalling order: %s", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		return
-	}
+	// Read the response from gRPC order service
 
 	// Return the status of the order to the client
-	c.JSON(http.StatusOK, gin.H{"status": response})
+	c.JSON(http.StatusOK, gin.H{"status": "Order created successfully"})
 }

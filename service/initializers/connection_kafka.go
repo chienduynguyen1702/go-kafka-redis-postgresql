@@ -1,30 +1,59 @@
 package initializers
 
 import (
+	"context"
 	"log"
 	"os"
-	kafka_connection "vcs-kafka-learning-go-service/modules/kafka"
+	kafka_connection "vcs-kafka-learning-go-gateway/modules/kafka"
 
 	"github.com/segmentio/kafka-go"
 )
 
 const (
-	orderTopicName    = "orders"
-	responseTopicName = "responses"
+	orderTopicName = "orders"
 )
 
 var kafkaBroker = []string{os.Getenv("KAFKA_BROKER")}
+var kafkaAddress = os.Getenv("KAFKA_BROKER")
+var orderTopicConsumer *kafka.Reader
 
-func ConnectKafka() (*kafka.Reader, *kafka.Writer) {
-	// Initialize Kafka writer
-	kafkaWriter, err := kafka_connection.NewKafkaWriter(orderTopicName, kafkaBroker)
+// Connect to Kafka and check if working topic is exist
+func ConnectConsumerToKafka() *kafka.Reader {
+	conn, err := kafka.DialLeader(context.Background(), "tcp", kafkaAddress, orderTopicName, 0)
 	if err != nil {
-		log.Fatalf("Failed to create Kafka writer: %v", err)
+		panic(err.Error())
 	}
-	// Initialize Kafka reader
-	kafkaReader, err := kafka_connection.NewKafkaReader(responseTopicName, kafkaBroker)
+	defer conn.Close()
+
+	if err := CreateOrderTopicIfNotExists(conn); err != nil {
+		panic(err.Error())
+	}
+	orderTopicConsumer = kafka_connection.NewKafkaReader(orderTopicName, kafkaBroker)
+	return orderTopicConsumer
+}
+
+// CreateTopicIfNotExists create topic if not exists
+func CreateOrderTopicIfNotExists(conn *kafka.Conn) error {
+	partitions, err := conn.ReadPartitions()
 	if err != nil {
-		log.Fatalf("Failed to create Kafka reader: %v", err)
+		panic(err.Error())
 	}
-	return kafkaReader, kafkaWriter
+
+	for _, p := range partitions {
+		if p.Topic == orderTopicName {
+			log.Printf("Topic %s is already existed.", orderTopicName)
+			return nil
+		}
+	}
+
+	err = conn.CreateTopics(kafka.TopicConfig{
+		Topic:             orderTopicName,
+		NumPartitions:     1,
+		ReplicationFactor: 1,
+	})
+	if err != nil {
+		panic(err.Error())
+	}
+	log.Printf("Topic %s created.", orderTopicName)
+	return nil
 }

@@ -10,13 +10,13 @@ services:
       - "6379:6379"
     networks:
       - vcs-kafka-learning
-  zookeeper:
-    image: wurstmeister/zookeeper:latest
-    container_name: vcs-zookeeper
-    ports:
-      - "2181:2181"
-    networks:
-      - vcs-kafka-learning
+  # zookeeper:
+  #   image: wurstmeister/zookeeper:latest
+  #   container_name: vcs-zookeeper
+  #   ports:
+  #     - "2181:2181"
+  #   networks:
+  #     - vcs-kafka-learning
 
   # kafka:
   #   image: wurstmeister/kafka:latest
@@ -31,26 +31,52 @@ services:
   #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock
-  kafka:
-    image: wurstmeister/kafka:latest
-    container_name: vcs-kafka
+  # kafka:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: vcs-kafka
+  #   environment:
+  #     # HOSTNAME_COMMAND: kafka
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+  #     KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+  #     KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+  #     KAFKA_ADVERTISED_PORT: 9092
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_CREATE_TOPICS: "orders:1:2,responses:1:2,test:1:2"
+  #   depends_on:
+  #     - zookeeper
+  #   ports:
+  #     - "9092:9092"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   networks:
+  #     - vcs-kafka-learning
+  broker:
+    image: apache/kafka:latest
+    hostname: broker
+    container_name: vcs-broker
     environment:
-      # HOSTNAME_COMMAND: kafka
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
-      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-      KAFKA_ADVERTISED_PORT: 9092
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "orders:1:2,responses:1:2,test:1:2"
-    depends_on:
-      - zookeeper
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT_HOST://broker:9092,PLAINTEXT://broker:19092'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
+      KAFKA_LISTENERS: 'CONTROLLER://:29093,PLAINTEXT_HOST://:9092,PLAINTEXT://:19092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
     ports:
       - "9092:9092"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - vcs-kafka-learning
+
   gateway:
     container_name: vcs-gateway
     build:
@@ -67,35 +93,34 @@ services:
       REDIS_PROTOCOL: 3
       RUN_ON: container
       GIN_MODE: release
-      KAFKA_BROKER: kafka:9092
+      KAFKA_BROKER: broker:9092
     depends_on:
       - redis
-      - kafka
+      - broker
     networks:
       - vcs-kafka-learning
-  # service:
-  #   container_name: vcs-service
-  #   build:
-  #     context: ./service
-  #     dockerfile: service.Dockerfile
-  #   ports:
-  #     - "8080:8080"
-  #   restart: on-failure
-  #   environment:
-  #     REDIS_PORT: 6379
-  #     REDIS_HOST: vcs-redis
-  #     REDIS_PASSWORD: 123456
-  #     REDIS_DB: 0
-  #     REDIS_PROTOCOL: 3
-  #     RUN_ON: container
-  #     GIN_MODE: release
-  #   depends_on:
-  #     - redis
-  #     # - kafka
-  #   networks:
-  #     - vcs-kafka-learning
-
-
+  service:
+    container_name: vcs-service
+    build:
+      context: ./service
+      dockerfile: service.Dockerfile
+    ports:
+      - "8081:8081"
+    restart: on-failure
+    environment:
+      REDIS_PORT: 6379
+      REDIS_HOST: vcs-redis
+      REDIS_PASSWORD: 123456
+      REDIS_DB: 0
+      REDIS_PROTOCOL: 3
+      RUN_ON: container
+      GIN_MODE: release
+      KAFKA_BROKER: broker:9092
+    depends_on:
+      - redis
+      # - kafka
+    networks:
+      - vcs-kafka-learning
 
 networks:
   vcs-kafka-learning:

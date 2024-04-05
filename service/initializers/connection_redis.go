@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	redis_connection "vcs-kafka-learning-go-service/modules/redis"
+	redis_connection "vcs-kafka-learning-go-gateway/modules/redis"
 
 	"github.com/redis/go-redis/v9"
 )

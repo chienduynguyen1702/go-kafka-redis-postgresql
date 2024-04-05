@@ -11,6 +11,7 @@ import (
 var (
 	OrdersTopicProducer    *kafka.Writer
 	ResponsesTopicConsumer *kafka.Reader
+	KafkaConnection        *kafka.Conn
 	RedisClient            *redis.Client
 	ctxBackground          = context.Background()
 )
@@ -19,15 +20,17 @@ func SetRedis(rc *redis.Client) {
 	RedisClient = rc
 	log.Println("Connected to redis !")
 }
-func SetKafkaWriter(kw *kafka.Writer) {
-	OrdersTopicProducer = kw
-	log.Println("Connected to kafka as Producer !")
-	// print the kafka writer
-	// log.Printf("Kafka Writer: %v", OrdersTopicProducer)
+func SetKafkaConnection(kc *kafka.Conn) {
+	KafkaConnection = kc
+	log.Println("Connected to kafka !")
 }
+
 func SetKafkaReader(kr *kafka.Reader) {
 	ResponsesTopicConsumer = kr
 	log.Println("Connected to kafka as Consumer !")
-	// print the kafka reader
-	// log.Printf("Kafka Reader: %v", ResponsesTopicConsumer)
+}
+
+func SetKafkaWriter(kw *kafka.Writer) {
+	OrdersTopicProducer = kw
+	log.Println("Connected to kafka as Producer !")
 }

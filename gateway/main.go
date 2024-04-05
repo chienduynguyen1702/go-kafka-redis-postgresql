@@ -22,13 +22,13 @@ func init() {
 	redisClient := initializers.ConnectRedis()
 	controllers.SetRedis(redisClient)
 
-	// Connect to Kafka
-	ResponsesTopicConsumer, OrdersTopicProducer := initializers.ConnectKafka()
-	controllers.SetKafkaWriter(OrdersTopicProducer)
-	controllers.SetKafkaReader(ResponsesTopicConsumer)
+	// Connect to Kafka and check if working topic is exist
+	orderTopicProducer := initializers.ConnectProducerToKafka()
+
+	// Create topic producer
+	controllers.SetKafkaWriter(orderTopicProducer)
 
 	log.Println("Finish initiation !")
-
 }
 func main() {
 
