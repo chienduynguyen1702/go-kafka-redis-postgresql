@@ -25,10 +25,12 @@ func NewKafkaWriter(topic string, kafkaAddress string) *kafka.Writer {
 // Read message from Kafka topic
 func NewKafkaReader(topic string, kafkaBroker []string) *kafka.Reader {
 	return kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  kafkaBroker,
-		Topic:    topic,
-		GroupID:  "vcs-kafka-learning-go-gateway",
-		MinBytes: 10e3, // 10KB
-		MaxBytes: 10e6, // 10MB
+		Brokers:          kafkaBroker,
+		Topic:            topic,
+		GroupID:          "vcs-kafka-learning-go-gateway",
+		MinBytes:         10e3, // 10KB
+		MaxBytes:         10e6, // 10MB
+		ReadBatchTimeout: 1e6,
+		MaxWait:          1e6,
 	})
 }

@@ -9,10 +9,10 @@ import (
 )
 
 var (
-	OrdersTopicConsumer *kafka.Reader
-	KafkaConnection     *kafka.Conn
-	RedisClient         *redis.Client
-	ctxBackground       = context.Background()
+	OrdersTopicConsumer   *kafka.Reader
+	KafkaConnection       *kafka.Conn
+	RedisClient           *redis.Client
+	ctxBackground, cancel = context.WithCancel(context.Background())
 )
 
 func SetRedis(rc *redis.Client) {
