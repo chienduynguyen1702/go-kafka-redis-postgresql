@@ -94,6 +94,7 @@ services:
       RUN_ON: container
       GIN_MODE: release
       KAFKA_BROKER: broker:9092
+      KAFKA_BATCH_TIMEOUT: 1 #ns
     depends_on:
       - redis
       - broker
@@ -116,6 +117,7 @@ services:
       RUN_ON: container
       GIN_MODE: release
       KAFKA_BROKER: broker:9092
+      KAFKA_BATCH_TIMEOUT: 1 #ns
     depends_on:
       - redis
       # - kafka

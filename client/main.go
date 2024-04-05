@@ -15,6 +15,7 @@ func main() {
 }
 func menu() {
 	var choice int
+	go order_request.StartOrderSenderWorker()
 	for {
 		order_request.FetchItems(&items)
 		fmt.Println("Select the operation")

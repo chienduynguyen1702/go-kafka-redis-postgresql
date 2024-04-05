@@ -13,12 +13,13 @@ import (
 
 const (
 	MAX_QUANTITY       = 15
-	MAX_MULTIPLE_ORDER = 100
+	MAX_MULTIPLE_ORDER = 10000
 )
 
 var (
 	internalItemsList []order_body.Item
 	globalRandom      = rand.New(rand.NewSource(time.Now().UnixNano()))
+	RequestChannel    = make(chan order_body.CreateOrderRequest, MAX_MULTIPLE_ORDER)
 )
 
 func SendARandomOrder() {
@@ -34,7 +35,7 @@ func SendARandomOrder() {
 	// Generate a random quantity between 1 and 15 (MAX_QUANTITY)
 	randomQuantity := globalRandom.Intn(MAX_QUANTITY) + 1
 
-	// Send order request
+	// Create order request
 	orderRequest := order_body.CreateOrderRequest{
 		Item: order_body.Item{
 			ID:       randomItem.ID,
@@ -42,13 +43,25 @@ func SendARandomOrder() {
 			Quantity: randomQuantity,
 		},
 	}
-	err := orderRequest.Send()
-	if err != nil {
-		fmt.Println("Error sending order request:", err)
-		return
-	}
-	fmt.Println("Order sent successfully!")
+
+	// Push the order request to the channel
+	RequestChannel <- orderRequest
 }
+
+func StartOrderSenderWorker() {
+	startTime := time.Now()
+	for orderRequest := range RequestChannel {
+		// Sending order request
+		err := orderRequest.Send()
+		if err != nil {
+			fmt.Println("Error sending order request:", err)
+			continue
+		}
+		fmt.Println("Order sent successfully!")
+	}
+	fmt.Printf("%d Order sender worker finished in %v\n", MAX_MULTIPLE_ORDER, time.Since(startTime))
+}
+
 func SendMultipleRandomOrders() {
 	// fmt.Printf("Enter the number of orders: ")
 	// var numberOfOrders int
@@ -60,6 +73,7 @@ func SendMultipleRandomOrders() {
 	// fmt.Println("All orders sent successfully!")
 	for i := 0; i < MAX_MULTIPLE_ORDER; i++ {
 		SendARandomOrder()
+		time.Sleep(1e2)
 	}
 	fmt.Printf("%d orders sent successfully!", MAX_MULTIPLE_ORDER)
 }
