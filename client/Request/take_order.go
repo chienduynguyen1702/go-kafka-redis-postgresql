@@ -63,14 +63,19 @@ func StartOrderSenderWorker() {
 }
 
 func SendMultipleRandomOrders() {
+	// Seed the entered number
 	// fmt.Printf("Enter the number of orders: ")
 	// var numberOfOrders int
 	// fmt.Scanln(&numberOfOrders)
 
 	// for i := 0; i < numberOfOrders; i++ {
 	// 	SendARandomOrder()
+	// 	time.Sleep(1e2)
+
 	// }
 	// fmt.Println("All orders sent successfully!")
+
+	// Seed MAX_MULTIPLE_ORDER random orders
 	for i := 0; i < MAX_MULTIPLE_ORDER; i++ {
 		SendARandomOrder()
 		time.Sleep(1e2)
@@ -106,4 +111,21 @@ func FetchItems(items *[]order_body.Item) {
 }
 func setItemList(items *[]order_body.Item) {
 	internalItemsList = *items
+}
+
+func RenewItemLists() {
+	response, err := http.Post(api.Endpoint+"/items", "application/json", nil)
+	if err != nil {
+		panic(err)
+	}
+	defer response.Body.Close()
+
+	// Read response body
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {	
+		panic(err)
+	}
+
+	fmt.Println("Response:", string(responseBody))
+	fmt.Println("")
 }

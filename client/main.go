@@ -22,6 +22,7 @@ func menu() {
 		fmt.Println("1. List all items")
 		fmt.Println("2. Make one random order")
 		fmt.Println("3. Make multiple random orders")
+		fmt.Println("4. Renew the list of items")
 		fmt.Println("0. Exit")
 		fmt.Print("Enter the operation number: ")
 
@@ -41,6 +42,8 @@ func menu() {
 			order_request.SendARandomOrder()
 		case 3:
 			order_request.SendMultipleRandomOrders()
+		case 4:
+			order_request.RenewItemLists()
 		default:
 			fmt.Println("Invalid operation number. Please try again.")
 		}
