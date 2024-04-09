@@ -42,3 +42,7 @@ delete-order-topic:
 delete-__consumer_offsets-topic:
 	docker-compose exec $(BROKER_HOST) $(KAFKA_PATH_SH)/kafka-topics.sh --delete --topic __consumer_offsets --bootstrap-server $(BROKER_HOST):9092
 
+
+
+start-compose:
+	docker compose up --build -d

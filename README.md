@@ -22,8 +22,16 @@ The architecture is composed of 5 main components:
 ## Start:
 
 ```bash
-docker-compose up --build -d
+docker compose up --build -d
+```
+
+then change dir to client/ to start client
+
+```bash
+cd client/
+go run main.go
 ```
 
 ## Addition:
+
 - Makefile is available
