@@ -15,7 +15,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN go build -v -o ./gateway
+RUN go build -v -o ./service
 
 # Start a new stage from scratch
 FROM alpine:latest  
@@ -24,10 +24,10 @@ FROM alpine:latest
 WORKDIR /root/
 
 # Copy the binary from the builder stage to the current stage
-COPY --from=builder /app/gateway ./gateway
+COPY --from=builder /app/service ./service
 
 # Expose port 8080 to the outside world
 EXPOSE 8080
 
 # Command to run the executable
-CMD ["/root/gateway"]
+CMD ["/root/service"]

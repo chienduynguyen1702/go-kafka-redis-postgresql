@@ -3,20 +3,20 @@ version: '3'
 services:
   redis:
     image: redis:alpine
-    container_name: vcs-redis
+    container_name: vcs2-redis
     restart: always
     command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
     ports:
-      - "6379:6379"
+      - "6378:6379"
     networks:
-      - vcs-kafka-learning
+      - vcs2-kafka-learning
   # zookeeper:
   #   image: wurstmeister/zookeeper:latest
-  #   container_name: vcs-zookeeper
+  #   container_name: vcs2-zookeeper
   #   ports:
   #     - "2181:2181"
   #   networks:
-  #     - vcs-kafka-learning
+  #     - vcs2-kafka-learning
 
   # kafka:
   #   image: wurstmeister/kafka:latest
@@ -33,7 +33,7 @@ services:
   #     - /var/run/docker.sock:/var/run/docker.sock
   # kafka:
   #   image: wurstmeister/kafka:latest
-  #   container_name: vcs-kafka
+  #   container_name: vcs2-kafka
   #   environment:
   #     # HOSTNAME_COMMAND: kafka
   #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
@@ -50,11 +50,11 @@ services:
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock
   #   networks:
-  #     - vcs-kafka-learning
+  #     - vcs2-kafka-learning
   broker:
     image: apache/kafka:latest
     hostname: broker
-    container_name: vcs-broker
+    container_name: vcs2-broker
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
@@ -75,10 +75,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - vcs-kafka-learning
+      - vcs2-kafka-learning
 
   gateway:
-    container_name: vcs-gateway
+    container_name: vcs2-gateway
     build:
       context: ./gateway
       dockerfile: gateway.Dockerfile
@@ -87,7 +87,7 @@ services:
     restart: on-failure
     environment:
       REDIS_PORT: 6379
-      REDIS_HOST: vcs-redis
+      REDIS_HOST: vcs2-redis
       REDIS_PASSWORD: 123456
       REDIS_DB: 0
       REDIS_PROTOCOL: 3
@@ -95,13 +95,14 @@ services:
       GIN_MODE: release
       KAFKA_BROKER: broker:9092
       KAFKA_BATCH_TIMEOUT: 1 #ns
+      RPC_PORT: 50505
     depends_on:
       - redis
       - broker
     networks:
-      - vcs-kafka-learning
+      - vcs2-kafka-learning
   service:
-    container_name: vcs-service
+    container_name: vcs2-service
     build:
       context: ./service
       dockerfile: service.Dockerfile
@@ -110,7 +111,7 @@ services:
     restart: on-failure
     environment:
       REDIS_PORT: 6379
-      REDIS_HOST: vcs-redis
+      REDIS_HOST: vcs2-redis
       REDIS_PASSWORD: 123456
       REDIS_DB: 0
       REDIS_PROTOCOL: 3
@@ -118,12 +119,14 @@ services:
       GIN_MODE: release
       KAFKA_BROKER: broker:9092
       KAFKA_BATCH_TIMEOUT: 1 #ns
+      RPC_HOST: gateway
+      RPC_PORT: 50505
     depends_on:
       - redis
       # - kafka
     networks:
-      - vcs-kafka-learning
+      - vcs2-kafka-learning
 
 networks:
-  vcs-kafka-learning:
+  vcs2-kafka-learning:
     driver: bridge

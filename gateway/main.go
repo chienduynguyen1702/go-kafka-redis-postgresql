@@ -48,5 +48,7 @@ func main() {
 	// docs.SwaggerInfo.BasePath = "/api/v1"
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	log.Printf("Server is running on :8080 with %s Gin mode", os.Getenv("GIN_MODE"))
+
+	go controllers.SetRPCClient()
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

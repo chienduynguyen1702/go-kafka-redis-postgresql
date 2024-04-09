@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
 	"vcs-kafka-learning-go-gateway/models"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +42,8 @@ func CreateOrder(c *gin.Context) {
 		Key:   nil,       // Optionally, you can specify a message key
 		Value: orderJSON, // Set the value of the message to the marshalled order JSON
 	}
-	startTime := time.Now()
+	// startTime := time.Now()
+
 	// Write the message to the Kafka topic
 	err = OrdersTopicProducer.WriteMessages(c, message)
 	if err != nil {
@@ -51,9 +51,15 @@ func CreateOrder(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
+	log.Println("Send to broker message: ", orderData)
 
-	// Read the response from gRPC order service
-
-	// Return the status of the order to the client
-	c.JSON(http.StatusOK, gin.H{"status": "Order created successfully after " + time.Since(startTime).String()})
+	// Read the response from responseChannel
+	response := <-responseChannel
+	log.Println("Response from rpc client: ", response)
+	if response.IsSucceed {
+		c.JSON(http.StatusOK, gin.H{"status": "Order created successfully"})
+		return
+	}
+	// If the response is not successful, return an error to the client
+	c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 }

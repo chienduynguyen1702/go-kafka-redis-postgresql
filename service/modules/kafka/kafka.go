@@ -36,7 +36,7 @@ func NewKafkaWriter(topic string, kafkaAddress string) *kafka.Writer {
 // Read message from Kafka topic
 func NewKafkaReader(topic string, kafkaBroker []string) *kafka.Reader { // Parse the environment variable for batch timeout duration
 	batchTimeoutEnv := os.Getenv("KAFKA_BATCH_TIMEOUT")
-	batchTimeout, err := strconv.ParseInt(batchTimeoutEnv, 10, 64)
+	batchTimeout, err := strconv.Atoi(batchTimeoutEnv)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -45,7 +45,7 @@ func NewKafkaReader(topic string, kafkaBroker []string) *kafka.Reader { // Parse
 	return kafka.NewReader(kafka.ReaderConfig{
 		Brokers:          kafkaBroker,
 		Topic:            topic,
-		GroupID:          "vcs-kafka-learning-go-gateway",
+		GroupID:          "vcs-kafka-learning-go-service",
 		MinBytes:         10e3, // 10KB
 		MaxBytes:         10e6, // 10MB
 		ReadBatchTimeout: readBatchTimeout,

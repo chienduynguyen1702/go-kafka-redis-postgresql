@@ -1,0 +1,17 @@
+syntax="proto3";
+
+option go_package = "./proto";
+
+package response_service;
+
+service ResponseService {
+  rpc SendResponse (ResponseBody) returns (NoMessage);
+}
+
+message NoMessage {
+}
+
+message ResponseBody {
+  string message = 1;
+  bool is_succeed = 2;
+}
