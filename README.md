@@ -1,4 +1,4 @@
-# Sale Campaigne Simulation
+# Sale **Campaign** Simulation
 
 ## Tech stack
 
