@@ -22,8 +22,15 @@ func init() {
 	// Create topic Consumer
 	controllers.SetKafkaReader(orderTopicConsumer)
 
+	// Connect to RPC server
+	rpcClient := initializers.ConnectToRPCServer()
+	controllers.SetRpcClient(rpcClient)
+
 	log.Println("Finish initiation !")
 }
 func main() {
+	// setup rpc server
+	// go controllers.SetupRPCServer()
+	// start service
 	controllers.StartService()
 }

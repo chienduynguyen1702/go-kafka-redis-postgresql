@@ -3,15 +3,18 @@ package controllers
 import (
 	"context"
 	"log"
+	"vcs-kafka-learning-go-gateway/proto"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
 )
 
 var (
-	OrdersTopicConsumer   *kafka.Reader
-	KafkaConnection       *kafka.Conn
-	RedisClient           *redis.Client
+	OrdersTopicConsumer *kafka.Reader
+	KafkaConnection     *kafka.Conn
+	RedisClient         *redis.Client
+	// ctxBackground       = context.Background()
+	rpcClient           proto.ResponseServiceClient
 	ctxBackground, cancel = context.WithCancel(context.Background())
 )
 
@@ -29,7 +32,7 @@ func SetKafkaReader(kr *kafka.Reader) {
 	log.Println("Connected to kafka as Consumer !")
 }
 
-// func SetKafkaWriter(kw *kafka.Writer) {
-// 	OrdersTopicProducer = kw
-// 	log.Println("Connected to kafka as Producer !")
-// }
+func SetRpcClient(c proto.ResponseServiceClient) {
+	rpcClient = c
+	log.Println("Connected to RPC server !")
+}
